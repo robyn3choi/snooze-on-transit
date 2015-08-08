@@ -25,7 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 
-public class MapsActivity extends FragmentActivity implements LocationListener, GoogleMap.OnMapClickListener {
+public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     public LatLng destination;
@@ -152,7 +152,42 @@ public class MapsActivity extends FragmentActivity implements LocationListener, 
         myLocation = locationManager.getLastKnownLocation(provider);
 
 //         request that the provider send this activity GPS updates every 20 seconds
-        locationManager.requestLocationUpdates(provider, 5000, 0, this);
+        locationManager.requestLocationUpdates(provider, 5000, 0, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+              //  current = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                myLocation = location;
+
+                double myLat = myLocation.getLatitude();
+                double myLong = myLocation.getLongitude();
+                resultText.setText("myLat = " + String.valueOf(myLat) + " and myLong = " + String.valueOf(myLong) );
+
+
+                if (destination != null && myLocation != null) {
+                    calculateDistance();
+                }
+
+                if (isCloseEnough(distance) && isAlarmSet) {
+                    playAlarm();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        });
 
 //        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
 //            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
@@ -184,35 +219,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener, 
     }
 
 
-    @Override
-    public void onLocationChanged(Location location) {
-
-        current = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-
-        if (destination != null && myLocation != null) {
-            calculateDistance();
-        }
-
-        if (isCloseEnough(distance) && isAlarmSet) {
-            playAlarm(this, getAlarmSound());
-        }
-    }
-
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 
     @Override
     public void onMapClick(LatLng latLng) {
@@ -224,9 +230,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener, 
                     .snippet("You're going here"));
             destination = latLng;
 
-            if (destination != null && current != null) {  // if there is a destination and a current
-                calculateDistance();
-            }
+//            if (destination != null && current != null) {  // if there is a destination and a current
+//                calculateDistance();
+//            }
         }
     }
 
@@ -274,7 +280,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener, 
         isAlarmSet = false;
     }
 
-    public void playAlarm(Context context, Uri alert) {
+    public void playAlarm() {
         //STUB
         if (isAlarmPlaying) {
             return;
@@ -282,8 +288,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener, 
         isAlarmPlaying = true;
         player = new MediaPlayer();
         try {
-            player.setDataSource(context, alert);
-            final AudioManager audio = (AudioManager) context
+            player.setDataSource(context, getAlarmSound());
+            final AudioManager audio = (AudioManager) this
                     .getSystemService(Context.AUDIO_SERVICE);
             if (audio.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
                 player.setAudioStreamType(AudioManager.STREAM_ALARM);
