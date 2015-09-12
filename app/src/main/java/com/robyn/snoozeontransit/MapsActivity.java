@@ -313,4 +313,12 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapCli
         return alertSound;
     }
 
+    @Override
+    protected void onPause() {
+        if (!isAlarmSet) {
+            super.onPause();
+        }
+    }
+
+
 }
