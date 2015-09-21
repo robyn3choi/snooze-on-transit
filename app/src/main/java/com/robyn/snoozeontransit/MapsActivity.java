@@ -253,7 +253,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapCli
         double myLat = myLocation.getLatitude();
 
   //      Log.d(TAG, "myLocation is" + myLat +"km.");
-        resultText.setText("You are " + Float.toString(distance) + "away from your destination. And myLat = " + String.valueOf(myLat) );
+        resultText.setText("You are " + Float.toString(distance) + "km away from your destination." );
 
 
 
